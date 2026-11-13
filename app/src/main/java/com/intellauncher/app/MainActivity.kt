@@ -17,6 +17,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
@@ -28,12 +31,15 @@ private val bg = Color(0xFF080B16)
 private val panel = Color(0xFF171B2C)
 private val accent = Color(0xFFAE8BFF)
 private val muted = Color(0xFFB4B5C9)
+private val ink = Color(0xFFF5F3FF)
+private val blue = Color(0xFF6F91FF)
+private val cardBrush = Brush.linearGradient(listOf(Color(0xFF20233A), Color(0xFF141827)))
 
 class MainActivity : ComponentActivity() {
  override fun onCreate(savedInstanceState: Bundle?) {
   super.onCreate(savedInstanceState)
   setContent {
-   MaterialTheme(colorScheme = darkColorScheme(primary = accent, background = bg, surface = panel)) {
+   MaterialTheme(colorScheme = darkColorScheme(primary = accent, onPrimary = bg, background = bg, onBackground = ink, surface = panel, onSurface = ink, surfaceVariant = panel, onSurfaceVariant = muted)) {
     Screen()
    }
   }
@@ -49,7 +55,7 @@ class MainActivity : ComponentActivity() {
     .map { it.loadLabel(packageManager).toString() to it.activityInfo.packageName }
     .distinctBy { it.second }.sortedBy { it.first.lowercase() }
   }
-  Column(Modifier.fillMaxSize().background(bg).padding(horizontal = 18.dp, vertical = 24.dp)) {
+  Column(Modifier.fillMaxSize().background(bg).padding(start = 18.dp, end = 18.dp, top = 18.dp, bottom = 34.dp)) {
    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
     Text("INTEL / LAUNCHER", color = accent, fontSize = 12.sp, fontWeight = FontWeight.Bold)
     Text(listOf("WORKSPACE", "HOME", "INTELLIGENCE")[page], color = muted, fontSize = 11.sp)
@@ -66,7 +72,7 @@ class MainActivity : ComponentActivity() {
      })
    }) {
     if (drawer) Column {
-     Text("Aplicativos", fontSize = 26.sp, fontWeight = FontWeight.Bold)
+     Text("Aplicativos", color = ink, fontSize = 26.sp, fontWeight = FontWeight.Bold)
      OutlinedTextField(query, { query = it }, label = { Text("Buscar aplicativo") }, modifier = Modifier.fillMaxWidth())
      LazyColumn {
       items(apps.filter { it.first.contains(query, ignoreCase = true) }) { app ->
@@ -75,7 +81,7 @@ class MainActivity : ComponentActivity() {
        }.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
         Icon(Icons.Outlined.Apps, null, tint = accent)
         Spacer(Modifier.width(12.dp))
-        Text(app.first)
+        Text(app.first, color = ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
        }
       }
      }
@@ -101,19 +107,19 @@ class MainActivity : ComponentActivity() {
  }
  @Composable private fun Nav(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, action: () -> Unit) {
   Column(Modifier.clickable(onClick = action).padding(5.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-   Box(Modifier.size(49.dp).background(panel, RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center) {
+   Box(Modifier.size(49.dp).background(cardBrush, RoundedCornerShape(16.dp)).border(1.dp, Color(0xFF343955), RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center) {
     Icon(icon, title, tint = accent)
    }
    Text(title, color = muted, fontSize = 11.sp)
   }
  }
  @Composable private fun Tile(title: String, body: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
-  Column(Modifier.fillMaxWidth().padding(vertical = 7.dp).background(panel, RoundedCornerShape(20.dp))
+  Column(Modifier.fillMaxWidth().padding(vertical = 7.dp).background(cardBrush, RoundedCornerShape(20.dp))
    .border(1.dp, Color(0xFF34344F), RoundedCornerShape(20.dp)).padding(17.dp)) {
    Row(verticalAlignment = Alignment.CenterVertically) {
     Icon(icon, null, tint = accent)
     Spacer(Modifier.width(10.dp))
-    Text(title, fontWeight = FontWeight.SemiBold)
+    Text(title, color = ink, fontWeight = FontWeight.SemiBold)
    }
    Spacer(Modifier.height(10.dp))
    Text(body, color = muted, lineHeight = 21.sp)
@@ -122,26 +128,26 @@ class MainActivity : ComponentActivity() {
  @Composable private fun Home(openApps: () -> Unit) {
   Column(Modifier.verticalScroll(rememberScrollState())) {
    Spacer(Modifier.height(35.dp))
-   Text(SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()), fontSize = 58.sp, fontWeight = FontWeight.Light)
+   Text(SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date()), color = ink, fontSize = 58.sp, fontWeight = FontWeight.Light)
    Text(SimpleDateFormat("EEEE, dd MMMM", Locale.getDefault()).format(Date()), color = muted)
    Spacer(Modifier.height(30.dp))
-   Tile("Seu espaço", "Tela inicial do IntelLauncher.", Icons.Outlined.AutoAwesome)
+   Tile("Seu espaço", "Bem-vindo ao IntelLauncher • Design Edition", Icons.Outlined.AutoAwesome)
    Spacer(Modifier.height(14.dp))
    Row(Modifier.fillMaxWidth().clickable { openApps() }.background(panel, RoundedCornerShape(25.dp)).padding(18.dp)) {
     Icon(Icons.Outlined.Search, null, tint = accent)
     Spacer(Modifier.width(12.dp))
     Text("Buscar aplicativos", color = muted)
    }
-   Tile("Atalhos inteligentes", "Deslize horizontalmente para navegar entre os painéis.", Icons.Outlined.DashboardCustomize)
+   Tile("Navegação inteligente", "Workspace  •  Home  •  Intelligence", Icons.Outlined.DashboardCustomize)
   }
  }
  @Composable private fun Workspace() {
   Column(Modifier.verticalScroll(rememberScrollState())) {
-   Text("Workspace", fontSize = 29.sp, fontWeight = FontWeight.Bold)
+   Text("Workspace", color = ink, fontSize = 29.sp, fontWeight = FontWeight.Bold)
    Text("Agenda • Tarefas • Projetos", color = muted)
    Spacer(Modifier.height(16.dp))
-   Tile("Agenda", "Integração com calendário planejada.", Icons.Outlined.CalendarMonth)
-   Tile("Tarefas", "Espaço para prioridades e lembretes.", Icons.Outlined.CheckCircleOutline)
+   Tile("Sua agenda", "Compromissos e calendário em breve.", Icons.Outlined.CalendarMonth)
+   Tile("Prioridades", "Organize tarefas e lembretes neste espaço.", Icons.Outlined.CheckCircleOutline)
    Tile("Compromissos", "Seus eventos aparecerão aqui futuramente.", Icons.Outlined.EventNote)
   }
  }
@@ -150,11 +156,11 @@ class MainActivity : ComponentActivity() {
    (getSystemService(BATTERY_SERVICE) as BatteryManager).getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
   }
   Column(Modifier.verticalScroll(rememberScrollState())) {
-   Text("Intelligence", fontSize = 29.sp, fontWeight = FontWeight.Bold)
+   Text("Intelligence", color = ink, fontSize = 29.sp, fontWeight = FontWeight.Bold)
    Text("Threat Intel • Riscos • Sistema", color = muted)
    Spacer(Modifier.height(12.dp))
-   Tile("Threat Intelligence", "Feed em desenvolvimento. Sem dados de ameaças em tempo real.", Icons.Outlined.Shield)
-   Tile("Vulnerabilidades", "Integrações CISA KEV, NVD e EPSS planejadas.", Icons.Outlined.BugReport)
+   Tile("Visão de ameaças", "Módulo em preparação • sem dados ao vivo", Icons.Outlined.Shield)
+   Tile("Vulnerabilidades", "CISA KEV  •  NVD  •  EPSS\nIntegrações futuras", Icons.Outlined.BugReport)
    Tile("Saúde do dispositivo", "Bateria: " + (if (battery in 0..100) "$battery%" else "indisponível"), Icons.Outlined.BatteryFull)
    Tile("Fontes", "Os dados de CTI ainda não estão conectados.", Icons.Outlined.Info)
   }
